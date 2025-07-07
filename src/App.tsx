@@ -138,8 +138,8 @@ function App() {
     return () => clearTimeout(timer);
   }, [currentView, currentModal, gameState?.inCombat, showWelcome, gsapInitialized]);
 
-  // Show loading screen while game state is loading or playerStats is not initialized
-  if (isLoading || !gameState || !gameState.playerStats) {
+  // Show loading screen while game state is loading or critical properties are not initialized
+  if (isLoading || !gameState || !gameState.playerStats || !gameState.inventory || !gameState.statistics) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
@@ -170,13 +170,13 @@ function App() {
   // ONLY show modals if NOT in combat
   if (!gameState.inCombat) {
     // Show offline progress modal if there are rewards
-    if (gameState.offlineProgress.offlineCoins > 0 || gameState.offlineProgress.offlineGems > 0) {
+    if (gameState.offlineProgress && (gameState.offlineProgress.offlineCoins > 0 || gameState.offlineProgress.offlineGems > 0)) {
       if (currentModal !== 'offlineProgress') {
         setCurrentModal('offlineProgress');
       }
     }
     // Show daily rewards modal if available (only after offline progress is handled)
-    else if (gameState.dailyRewards.availableReward && currentModal !== 'dailyRewards') {
+    else if (gameState.dailyRewards?.availableReward && currentModal !== 'dailyRewards') {
       setCurrentModal('dailyRewards');
     }
   }
@@ -184,7 +184,7 @@ function App() {
   // Show welcome screen for new players
   if (showWelcome && gameState.zone === 1 && gameState.coins === 500) {
     return (
-      <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 ${gameState.settings.snapToGrid ? 'snap-to-grid' : ''} ${gameState.settings.beautyMode ? 'beauty-mode' : ''}`}>
+      <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4 ${gameState.settings?.snapToGrid ? 'snap-to-grid' : ''} ${gameState.settings?.beautyMode ? 'beauty-mode' : ''}`}>
         <FloatingIcons />
         <div className="text-center max-w-lg mx-auto relative z-10 start-screen-animate">
           <div className="mb-8">
@@ -303,7 +303,7 @@ function App() {
             />
 
             {/* Garden Status */}
-            {gameState.gardenOfGrowth.isPlanted && (
+            {gameState.gardenOfGrowth?.isPlanted && (
               <div className="bg-gradient-to-r from-green-900/50 to-emerald-900/50 p-4 sm:p-6 rounded-xl border border-green-500/50 backdrop-blur-sm">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-white font-bold text-base sm:text-lg flex items-center gap-2">
@@ -341,7 +341,7 @@ function App() {
             )}
             
             {/* Knowledge Streak Display */}
-            {gameState.knowledgeStreak.current > 0 && (
+            {gameState.knowledgeStreak?.current > 0 && (
               <div className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 p-4 sm:p-6 rounded-xl border border-yellow-500/50 backdrop-blur-sm">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-3 mb-3">
@@ -361,9 +361,9 @@ function App() {
             <div className="text-center space-y-4 sm:space-y-6">
               <button
                 onClick={startCombat}
-                disabled={gameState.playerStats.hp <= 0 || (gameState.gameMode.current === 'survival' && gameState.gameMode.survivalLives <= 0)}
+                disabled={gameState.playerStats.hp <= 0 || (gameState.gameMode?.current === 'survival' && gameState.gameMode.survivalLives <= 0)}
                 className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-white transition-all duration-300 transform flex items-center gap-3 justify-center text-base sm:text-lg shadow-lg ${
-                  gameState.playerStats.hp > 0 && (gameState.gameMode.current !== 'survival' || gameState.gameMode.survivalLives > 0)
+                  gameState.playerStats.hp > 0 && (gameState.gameMode?.current !== 'survival' || gameState.gameMode.survivalLives > 0)
                     ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 hover:scale-105 shadow-green-500/25'
                     : 'bg-gray-600 cursor-not-allowed opacity-50'
                 }`}
@@ -371,15 +371,15 @@ function App() {
                 <Play className="w-5 h-5 sm:w-6 sm:h-6" />
                 {gameState.playerStats.hp <= 0 
                   ? 'You are defeated!' 
-                  : gameState.gameMode.current === 'survival' && gameState.gameMode.survivalLives <= 0
+                  : gameState.gameMode?.current === 'survival' && gameState.gameMode.survivalLives <= 0
                     ? 'No lives remaining!'
                     : 'Start Adventure'}
               </button>
               
-              {(gameState.playerStats.hp <= 0 || (gameState.gameMode.current === 'survival' && gameState.gameMode.survivalLives <= 0)) && (
+              {(gameState.playerStats.hp <= 0 || (gameState.gameMode?.current === 'survival' && gameState.gameMode.survivalLives <= 0)) && (
                 <div className="bg-red-900/30 p-4 rounded-lg border border-red-500/50">
                   <p className="text-red-400 text-sm">
-                    {gameState.gameMode.current === 'survival' && gameState.gameMode.survivalLives <= 0
+                    {gameState.gameMode?.current === 'survival' && gameState.gameMode.survivalLives <= 0
                       ? 'Change game mode or reset to continue!'
                       : 'Visit the shop to get better equipment and try again!'}
                   </p>
@@ -606,7 +606,7 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative ${gameState.settings.snapToGrid ? 'snap-to-grid' : ''} ${gameState.settings.beautyMode ? 'beauty-mode' : ''}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative ${gameState.settings?.snapToGrid ? 'snap-to-grid' : ''} ${gameState.settings?.beautyMode ? 'beauty-mode' : ''}`}>
       <FloatingIcons />
       
       {/* PWA Install Prompt */}
@@ -649,7 +649,7 @@ function App() {
           {/* Quick Stats Bar - Hide during combat and on menu page */}
           {!gameState.inCombat && currentView !== 'menu' && (
             <div className="flex justify-center items-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm">
-              {gameState.dailyRewards.availableReward && (
+              {gameState.dailyRewards?.availableReward && (
                 <button
                   onClick={() => setCurrentModal('dailyRewards')}
                   className="flex items-center gap-1 sm:gap-2 text-green-300 hover:text-green-200 transition-colors animate-pulse px-2 sm:px-3 py-1 rounded-lg hover:bg-white/10"
