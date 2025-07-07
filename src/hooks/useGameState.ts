@@ -667,7 +667,7 @@ const useGameState = () => {
       const enemy = generateEnemy(prevState.zone);
       
       // Trigger adventure skill selection for zones 5+ (25% chance)
-      const shouldShowSkillSelection = prevState.zone >= 5 && Math.random() < 0.25;
+      const shouldShowSkillSelection = prevState.zone >= 1 && Math.random() < 1;
       
       let adventureSkillsUpdate = { ...prevState.adventureSkills };
       
